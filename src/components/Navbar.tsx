@@ -2,7 +2,7 @@
 
 import { useState, useSyncExternalStore } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   Sun,
   Moon,
@@ -16,53 +16,61 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import { useTheme } from "next-themes";
+import { authClient } from "@/lib/auth-client";
 
 const emptySubscribe = () => () => {};
 function useIsMounted() {
   return useSyncExternalStore(
     emptySubscribe,
     () => true,
-    () => false,
+    () => false
   );
 }
 
 const Navbar = () => {
   const pathname = usePathname();
-  
+  const route = useRouter();
+
   // Mock States
   const [isLoggedIn, setIsLoggedIn] = useState(true);
   const { theme, setTheme } = useTheme();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  
+
   const isMounted = useIsMounted();
 
   if (!isMounted) {
-    return <button className="p-2 rounded-md h-8 w-8 opacity-0" aria-hidden="true" />;
+    return <div className="h-16 w-full border-b border-white/[0.08] bg-[#08090A]" aria-hidden="true" />;
   }
 
   const isActive = (path: string) => pathname === path;
 
+  const handleLogout = () => {
+    authClient.signOut()
+    route.push('/login')
+  }
+
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-neutral-200 dark:border-neutral-800/80 bg-white dark:bg-black backdrop-blur-md text-neutral-900 dark:text-neutral-200 transition-colors">
+    <header className="sticky top-0 z-50 w-full border-b border-neutral-200/80 dark:border-white/[0.08] bg-white/90 dark:bg-[#08090A]/90 backdrop-blur-md text-neutral-900 dark:text-neutral-200 transition-colors">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="flex h-18 items-center justify-between gap-6">
-          {/* 1. LEFT: LOGO & MAIN NAV */}
+        <div className="flex h-16 items-center justify-between gap-6">
+          
+          {/* 1. LEFT: LOGO & NAVIGATION LINKS */}
           <div className="flex items-center gap-8">
-            <Link href="/" className="flex items-center gap-2 group">
-              <span className="text-[28px] font-semibold tracking-tight">
+            <Link href="/" className="flex justify-center items-center gap-2 group">
+              <span className="text-[26px] font-semibold tracking-tight text-neutral-900 dark:text-white">
                 Devo.
               </span>
             </Link>
 
-            {/* NAV LINKS */}
-            <nav className="hidden md:flex items-center gap-1">
+            {/* DESKTOP NAV LINKS (Standard text-sm) */}
+            <nav className="hidden md:flex items-center gap-6 text-sm font-medium">
               <Link
                 href="/"
-                className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+                className={`transition-colors ${
                   isActive("/")
-                    ? "border-b-2 border-neutral-900 dark:border-white font-semibold"
-                    : "text-neutral-600 dark:text-neutral-400 hover:text-black dark:hover:text-white"
+                    ? "text-neutral-900 dark:text-white font-semibold"
+                    : "text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white"
                 }`}
               >
                 Home
@@ -70,10 +78,10 @@ const Navbar = () => {
 
               <Link
                 href="/projects"
-                className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+                className={`transition-colors ${
                   isActive("/projects")
-                    ? "border-b-2 border-neutral-900 dark:border-white font-semibold"
-                    : "text-neutral-600 dark:text-neutral-400 hover:text-black dark:hover:text-white"
+                    ? "text-neutral-900 dark:text-white font-semibold"
+                    : "text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white"
                 }`}
               >
                 Projects
@@ -83,10 +91,10 @@ const Navbar = () => {
                 <>
                   <Link
                     href="/my-projects"
-                    className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+                    className={`transition-colors ${
                       isActive("/my-projects")
-                        ? "border-b-2 border-neutral-900 dark:border-white font-semibold"
-                        : "text-neutral-600 dark:text-neutral-400 hover:text-black dark:hover:text-white"
+                        ? "text-neutral-900 dark:text-white font-semibold"
+                        : "text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white"
                     }`}
                   >
                     My Projects
@@ -94,10 +102,10 @@ const Navbar = () => {
 
                   <Link
                     href="/my-interactions"
-                    className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+                    className={`transition-colors ${
                       isActive("/my-interactions")
-                        ? "border-b-2 border-neutral-900 dark:border-white font-semibold"
-                        : "text-neutral-600 dark:text-neutral-400 hover:text-black dark:hover:text-white"
+                        ? "text-neutral-900 dark:text-white font-semibold"
+                        : "text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white"
                     }`}
                   >
                     My Interactions
@@ -107,13 +115,13 @@ const Navbar = () => {
             </nav>
           </div>
 
-          {/* 2. RIGHT: ACTIONS & USER MENU */}
-          <div className="hidden md:flex items-center gap-3">
+          {/* 2. RIGHT: ACTIONS & USER PROFILE */}
+          <div className="hidden md:flex items-center gap-4 text-sm">
             {/* ADD PROJECT BUTTON */}
             {isLoggedIn && (
               <Link
                 href="/add-project"
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium bg-black dark:bg-white text-white dark:text-black hover:bg-neutral-800 dark:hover:bg-neutral-200 transition-colors shadow-sm"
+                className="flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-medium bg-neutral-100 dark:bg-white/10 text-neutral-900 dark:text-white hover:bg-neutral-200 dark:hover:bg-white/20 border border-neutral-300/50 dark:border-white/10 transition-all"
               >
                 <Plus className="h-3.5 w-3.5" />
                 <span>Add Project</span>
@@ -123,37 +131,42 @@ const Navbar = () => {
             {/* THEME TOGGLE */}
             <button
               onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-              className="cursor-pointer p-2 rounded-md text-neutral-600 dark:text-neutral-400 hover:text-black dark:hover:text-white transition-colors"
+              className="p-2 rounded-md text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white transition-colors cursor-pointer"
               title="Toggle Theme"
             >
               {theme === "dark" ? (
-                <Sun className="h-4.5 w-4.5 text-yellow-500" />
+                <Sun className="h-4 w-4 text-neutral-200" />
               ) : (
-                <Moon className="h-4.5 w-4.5 text-neutral-700" />
+                <Moon className="h-4 w-4 text-neutral-700" />
               )}
             </button>
 
-            {/* USER PROFILE DROPDOWN */}
+            {/* LINEAR STYLE VERTICAL DIVIDER */}
+            <div className="h-4 w-[1px] bg-neutral-200 dark:bg-white/10" />
+
+            {/* USER PROFILE DROPDOWN / AUTH BUTTONS */}
             {isLoggedIn ? (
               <div className="relative">
                 <button
                   onClick={() => setIsProfileOpen(!isProfileOpen)}
-                  className="cursor-pointer flex items-center justify-center h-9 w-9 rounded-full border border-neutral-300 dark:border-neutral-800 hover:bg-neutral-100 dark:hover:bg-neutral-900 transition-colors overflow-hidden focus:outline-none"
+                  className="flex items-center gap-1.5 focus:outline-none cursor-pointer"
                 >
-                  <Image
-                    src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200"
-                    alt="User Profile"
-                    width={32}
-                    height={32}
-                    className="h-full w-full rounded-full object-cover"
-                  />
+                  <div className="h-8 w-8 rounded-full overflow-hidden border border-neutral-300 dark:border-white/20">
+                    <Image
+                      src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200"
+                      alt="User Profile"
+                      width={28}
+                      height={28}
+                      className="h-full w-full object-cover"
+                    />
+                  </div>
                 </button>
 
                 {/* DROPDOWN MENU */}
                 {isProfileOpen && (
-                  <div className="absolute right-0 mt-4 w-48 rounded-md border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-950 p-1 shadow-xl backdrop-blur-xl transition-colors">
-                    <div className="px-3 py-2 border-b border-neutral-100 dark:border-neutral-800/80 mb-1">
-                      <p className="text-sm font-medium text-neutral-900 dark:text-white">
+                  <div className="absolute right-0 mt-3 w-52 rounded-lg border border-neutral-200 dark:border-white/10 bg-white dark:bg-[#08090A] p-1.5 shadow-2xl backdrop-blur-xl transition-all">
+                    <div className="px-3 py-2 border-b border-neutral-100 dark:border-white/10 mb-1">
+                      <p className="text-xs font-semibold text-neutral-900 dark:text-white">
                         Nabil Reza
                       </p>
                     </div>
@@ -161,58 +174,57 @@ const Navbar = () => {
                     <Link
                       href="/profile"
                       onClick={() => setIsProfileOpen(false)}
-                      className="flex items-center gap-2 px-2.5 py-1.5 text-sm rounded-md text-neutral-700 dark:text-neutral-300 hover:text-black dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-900 transition-colors"
+                      className="flex items-center gap-2 px-3 py-2 text-xs rounded-md text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-white/5 transition-colors"
                     >
-                      <User className="h-3.5 w-3.5 text-neutral-500 dark:text-neutral-400" />
+                      <User className="h-4 w-4" />
                       Profile Settings
                     </Link>
 
                     <Link
                       href="/my-projects"
                       onClick={() => setIsProfileOpen(false)}
-                      className="flex items-center gap-2 px-2.5 py-1.5 text-sm rounded-md text-neutral-700 dark:text-neutral-300 hover:text-black dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-900 transition-colors"
+                      className="flex items-center gap-2 px-3 py-2 text-xs rounded-md text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-white/5 transition-colors"
                     >
-                      <FolderGit2 className="h-3.5 w-3.5 text-neutral-500 dark:text-neutral-400" />
+                      <FolderGit2 className="h-4 w-4" />
                       My Projects
                     </Link>
 
                     <Link
                       href="/my-interactions"
                       onClick={() => setIsProfileOpen(false)}
-                      className="flex items-center gap-2 px-2.5 py-1.5 text-sm rounded-md text-neutral-700 dark:text-neutral-300 hover:text-black dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-900 transition-colors"
+                      className="flex items-center gap-2 px-3 py-2 text-xs rounded-md text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-white/5 transition-colors"
                     >
-                      <MessageSquare className="h-3.5 w-3.5 text-neutral-500 dark:text-neutral-400" />
+                      <MessageSquare className="h-4 w-4" />
                       Interactions
                     </Link>
 
-                    <div className="my-1 border-t border-neutral-100 dark:border-neutral-800/80" />
+                    <div className="my-1 border-t border-neutral-100 dark:border-white/10" />
 
                     <button
-                      onClick={() => {
-                        setIsLoggedIn(false);
-                        setIsProfileOpen(false);
-                      }}
-                      className="w-full flex items-center gap-2 px-2.5 py-1.5 text-sm rounded-md text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-500/10 transition-colors cursor-pointer"
+                      onClick={handleLogout}
+                      className="w-full flex items-center gap-2 px-3 py-3 text-xs rounded-md text-rose-500 hover:bg-rose-500/10 transition-colors cursor-pointer"
                     >
-                      <LogOut className="h-3.5 w-3.5" />
+                      <LogOut className="h-4 w-4" />
                       Logout
                     </button>
                   </div>
                 )}
               </div>
             ) : (
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-4">
                 <Link
                   href="/login"
-                  className="px-3 py-1.5 rounded-md text-sm font-medium text-neutral-700 dark:text-neutral-300 hover:text-black dark:hover:text-white transition-colors"
+                  className="text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white transition-colors"
                 >
-                  Login
+                  Log in
                 </Link>
+
+                {/* LINEAR SIGN UP BUTTON (Pill-shaped Light Button) */}
                 <Link
                   href="/register"
-                  className="px-3 py-1.5 rounded-md text-sm font-medium bg-black dark:bg-white text-white dark:text-black hover:bg-neutral-800 dark:hover:bg-neutral-200 transition-colors"
+                  className="px-4.5 py-2 rounded-full text-xs font-semibold bg-neutral-900 dark:bg-[#EEEEEE] text-white dark:text-black hover:bg-neutral-800 dark:hover:bg-white transition-colors"
                 >
-                  Register
+                  Sign up
                 </Link>
               </div>
             )}
@@ -220,123 +232,54 @@ const Navbar = () => {
 
           {/* MOBILE TOGGLE */}
           <div className="flex md:hidden items-center gap-2">
-            {/* THEME TOGGLE */}
             <button
               onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-              className="cursor-pointer p-2 rounded-md text-neutral-600 dark:text-neutral-400 hover:text-black dark:hover:text-white transition-colors"
-              title="Toggle Theme"
+              className="p-2 text-neutral-600 dark:text-neutral-400"
             >
               {theme === "dark" ? (
-                <Sun className="h-4.5 w-4.5 text-yellow-500" />
+                <Sun className="h-4 w-4 text-neutral-700" />
               ) : (
-                <Moon className="h-4.5 w-4.5 text-neutral-700" />
+                <Moon className="h-4 w-4 text-neutral-700" />
               )}
             </button>
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="p-1.5 rounded-md text-neutral-600 dark:text-neutral-400 hover:text-black dark:hover:text-white cursor-pointer"
+              className="p-2 text-neutral-600 dark:text-neutral-400"
             >
-              {isMobileMenuOpen ? (
-                <X className="h-5 w-5" />
-              ) : (
-                <Menu className="h-5 w-5" />
-              )}
+              {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </button>
           </div>
         </div>
       </div>
 
       {/* MOBILE MENU */}
-      <div
-        onClick={() => setIsMobileMenuOpen(false)}
-        className={`fixed z-40 transition-opacity duration-300 md:hidden ${
-          isMobileMenuOpen
-            ? "opacity-100 pointer-events-auto"
-            : "opacity-0 pointer-events-none"
-        }`}
-      />
-
-      <div
-        className={`absolute top-full left-0 right-0 z-50 w-full border-b border-neutral-200 dark:border-neutral-800 bg-white/95 dark:bg-neutral-950/95 p-4 shadow-2xl backdrop-blur-xl transition-all duration-300 ease-in-out md:hidden ${
-          isMobileMenuOpen
-            ? "opacity-100 translate-y-0 pointer-events-auto"
-            : "opacity-0 -translate-y-2 pointer-events-none"
-        }`}
-      >
-        <div className="flex flex-col space-y-1">
-          <Link
-            href="/"
-            onClick={() => setIsMobileMenuOpen(false)}
-            className="block px-3 py-2 rounded-lg text-sm font-medium text-neutral-700 dark:text-neutral-300 hover:text-black dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-900 transition-colors"
-          >
-            Home
-          </Link>
-
-          <Link
-            href="/projects"
-            onClick={() => setIsMobileMenuOpen(false)}
-            className="block px-3 py-2 rounded-lg text-sm font-medium text-neutral-700 dark:text-neutral-300 hover:text-black dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-900 transition-colors"
-          >
-            Projects
-          </Link>
-
-          {isLoggedIn ? (
-            <>
-              <Link
-                href="/my-projects"
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="block px-3 py-2 rounded-lg text-sm font-medium text-neutral-700 dark:text-neutral-300 hover:text-black dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-900 transition-colors"
-              >
-                My Projects
-              </Link>
-
-              <Link
-                href="/my-interactions"
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="block px-3 py-2 rounded-lg text-sm font-medium text-neutral-700 dark:text-neutral-300 hover:text-black dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-900 transition-colors"
-              >
-                My Interactions
-              </Link>
-
-              <Link
-                href="/add-project"
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="mt-2 block text-center px-3 py-2 rounded-lg text-sm font-medium bg-black dark:bg-white text-white dark:text-black hover:bg-neutral-800 dark:hover:bg-neutral-200 transition-colors"
-              >
-                + Add Project
-              </Link>
-
-              <button
-                onClick={() => {
-                  setIsLoggedIn(false);
-                  setIsMobileMenuOpen(false);
-                }}
-                className="mt-2 block w-full text-center px-3 py-2 rounded-lg text-sm font-medium bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-900/60 transition-colors cursor-pointer"
-              >
-                Logout
-              </button>
-            </>
-          ) : (
-            /* LOGGED OUT STATE */
-            <div className="pt-3 mt-2 border-t border-neutral-200 dark:border-neutral-800/80 grid grid-cols-2 gap-2">
-              <Link
-                href="/login"
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="flex items-center justify-center px-3 py-2 rounded-lg text-sm font-medium border border-neutral-200 dark:border-neutral-800 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-900 transition-colors"
-              >
-                Login
-              </Link>
-              <Link
-                href="/register"
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="flex items-center justify-center px-3 py-2 rounded-lg text-sm font-medium bg-black dark:bg-white text-white dark:text-black hover:bg-neutral-800 dark:hover:bg-neutral-200 transition-colors"
-              >
-                Register
-              </Link>
-            </div>
-          )}
+      {isMobileMenuOpen && (
+        <div className="border-b border-neutral-200 dark:border-white/10 bg-white dark:bg-[#08090A] px-4 py-4 md:hidden">
+          <div className="flex flex-col space-y-3 text-sm font-medium">
+            <Link href="/" onClick={() => setIsMobileMenuOpen(false)}>Home</Link>
+            <Link href="/projects" onClick={() => setIsMobileMenuOpen(false)}>Projects</Link>
+            {isLoggedIn ? (
+              <>
+                <Link href="/my-projects" onClick={() => setIsMobileMenuOpen(false)}>My Projects</Link>
+                <Link href="/my-interactions" onClick={() => setIsMobileMenuOpen(false)}>My Interactions</Link>
+                <Link href="/add-project" onClick={() => setIsMobileMenuOpen(false)} className="text-indigo-400 font-semibold">
+                  + Add Project
+                </Link>
+                <button onClick={handleLogout} className="text-left text-rose-500">
+                  Logout
+                </button>
+              </>
+            ) : (
+              <div className="flex flex-col gap-2.5 pt-2 border-t border-neutral-200 dark:border-white/10">
+                <Link href="/login" onClick={() => setIsMobileMenuOpen(false)}>Log in</Link>
+                <Link href="/register" onClick={() => setIsMobileMenuOpen(false)} className="inline-block text-center px-4 py-2 rounded-full bg-neutral-900 dark:bg-white text-white dark:text-black font-semibold">
+                  Sign up
+                </Link>
+              </div>
+            )}
+          </div>
         </div>
-      </div>
+      )}
     </header>
   );
 };

@@ -47,7 +47,7 @@ const Footer = () => {
                 className="hover:text-neutral-900 dark:hover:text-white transition-colors"
                 aria-label="GitHub"
               >
-                <FaGithub className="h-6 w-6" />
+                <FaGithub className="h-5 w-5" />
               </a>
               <a
                 href="https://x.com"
@@ -56,7 +56,7 @@ const Footer = () => {
                 className="hover:text-neutral-900 dark:hover:text-white transition-colors"
                 aria-label="X"
               >
-                <FaXTwitter className="h-6 w-6" />
+                <FaXTwitter className="h-5 w-5" />
               </a>
               <a
                 href="https://linkedin.com"
@@ -65,7 +65,7 @@ const Footer = () => {
                 className="hover:text-neutral-900 dark:hover:text-white transition-colors"
                 aria-label="LinkedIn"
               >
-                <FaLinkedin className="h-6 w-6" />
+                <FaLinkedin className="h-5 w-5" />
               </a>
             </div>
           </div>
