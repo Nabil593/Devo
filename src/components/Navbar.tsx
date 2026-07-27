@@ -16,14 +16,14 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import { useTheme } from "next-themes";
-import { authClient } from "@/lib/auth-client";
+import { authClient, useSession } from "@/lib/auth-client";
 
 const emptySubscribe = () => () => {};
 function useIsMounted() {
   return useSyncExternalStore(
     emptySubscribe,
     () => true,
-    () => false
+    () => false,
   );
 }
 
@@ -31,8 +31,9 @@ const Navbar = () => {
   const pathname = usePathname();
   const route = useRouter();
 
-  // Mock States
-  const [isLoggedIn, setIsLoggedIn] = useState(true);
+  const { data: session } = useSession();
+  const user = session?.user;
+
   const { theme, setTheme } = useTheme();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -40,24 +41,37 @@ const Navbar = () => {
   const isMounted = useIsMounted();
 
   if (!isMounted) {
-    return <div className="h-16 w-full border-b border-white/[0.08] bg-[#08090A]" aria-hidden="true" />;
+    return (
+      <div
+        className="h-16 w-full border-b border-white/[0.08] bg-[#08090A]"
+        aria-hidden="true"
+      />
+    );
   }
 
   const isActive = (path: string) => pathname === path;
 
-  const handleLogout = () => {
-    authClient.signOut()
-    route.push('/login')
-  }
+  const handleLogout = async () => {
+    try {
+      setIsProfileOpen(false); // ড্রপডাউন বন্ধ করুন
+      await authClient.signOut(); // সাইনআউট প্রসেস শেষ হওয়া পর্যন্ত অপেক্ষা করুন
+      route.push("/login"); // লগইন পেজে রিডাইরেক্ট করুন
+      route.refresh(); // পেজ ক্যাশ রিফ্রেশ করুন যাতে সেশন সাথে সাথে আপডেট হয়
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
+  };
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-neutral-200/80 dark:border-white/[0.08] bg-white/90 dark:bg-[#08090A]/90 backdrop-blur-md text-neutral-900 dark:text-neutral-200 transition-colors">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between gap-6">
-          
           {/* 1. LEFT: LOGO & NAVIGATION LINKS */}
           <div className="flex items-center gap-8">
-            <Link href="/" className="flex justify-center items-center gap-2 group">
+            <Link
+              href="/"
+              className="flex justify-center items-center gap-2 group"
+            >
               <span className="text-[26px] font-semibold tracking-tight text-neutral-900 dark:text-white">
                 Devo.
               </span>
@@ -87,7 +101,7 @@ const Navbar = () => {
                 Projects
               </Link>
 
-              {isLoggedIn && (
+              {user && (
                 <>
                   <Link
                     href="/my-projects"
@@ -118,7 +132,7 @@ const Navbar = () => {
           {/* 2. RIGHT: ACTIONS & USER PROFILE */}
           <div className="hidden md:flex items-center gap-4 text-sm">
             {/* ADD PROJECT BUTTON */}
-            {isLoggedIn && (
+            {user && (
               <Link
                 href="/add-project"
                 className="flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-medium bg-neutral-100 dark:bg-white/10 text-neutral-900 dark:text-white hover:bg-neutral-200 dark:hover:bg-white/20 border border-neutral-300/50 dark:border-white/10 transition-all"
@@ -145,7 +159,7 @@ const Navbar = () => {
             <div className="h-4 w-[1px] bg-neutral-200 dark:bg-white/10" />
 
             {/* USER PROFILE DROPDOWN / AUTH BUTTONS */}
-            {isLoggedIn ? (
+            {user ? (
               <div className="relative">
                 <button
                   onClick={() => setIsProfileOpen(!isProfileOpen)}
@@ -246,7 +260,11 @@ const Navbar = () => {
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               className="p-2 text-neutral-600 dark:text-neutral-400"
             >
-              {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+              {isMobileMenuOpen ? (
+                <X className="h-5 w-5" />
+              ) : (
+                <Menu className="h-5 w-5" />
+              )}
             </button>
           </div>
         </div>
@@ -256,23 +274,50 @@ const Navbar = () => {
       {isMobileMenuOpen && (
         <div className="border-b border-neutral-200 dark:border-white/10 bg-white dark:bg-[#08090A] px-4 py-4 md:hidden">
           <div className="flex flex-col space-y-3 text-sm font-medium">
-            <Link href="/" onClick={() => setIsMobileMenuOpen(false)}>Home</Link>
-            <Link href="/projects" onClick={() => setIsMobileMenuOpen(false)}>Projects</Link>
-            {isLoggedIn ? (
+            <Link href="/" onClick={() => setIsMobileMenuOpen(false)}>
+              Home
+            </Link>
+            <Link href="/projects" onClick={() => setIsMobileMenuOpen(false)}>
+              Projects
+            </Link>
+            {user ? (
               <>
-                <Link href="/my-projects" onClick={() => setIsMobileMenuOpen(false)}>My Projects</Link>
-                <Link href="/my-interactions" onClick={() => setIsMobileMenuOpen(false)}>My Interactions</Link>
-                <Link href="/add-project" onClick={() => setIsMobileMenuOpen(false)} className="text-indigo-400 font-semibold">
+                <Link
+                  href="/my-projects"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  My Projects
+                </Link>
+                <Link
+                  href="/my-interactions"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  My Interactions
+                </Link>
+                <Link
+                  href="/add-project"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="text-indigo-400 font-semibold"
+                >
                   + Add Project
                 </Link>
-                <button onClick={handleLogout} className="text-left text-rose-500">
+                <button
+                  onClick={handleLogout}
+                  className="text-left text-rose-500"
+                >
                   Logout
                 </button>
               </>
             ) : (
               <div className="flex flex-col gap-2.5 pt-2 border-t border-neutral-200 dark:border-white/10">
-                <Link href="/login" onClick={() => setIsMobileMenuOpen(false)}>Log in</Link>
-                <Link href="/register" onClick={() => setIsMobileMenuOpen(false)} className="inline-block text-center px-4 py-2 rounded-full bg-neutral-900 dark:bg-white text-white dark:text-black font-semibold">
+                <Link href="/login" onClick={() => setIsMobileMenuOpen(false)}>
+                  Log in
+                </Link>
+                <Link
+                  href="/register"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="inline-block text-center px-4 py-2 rounded-full bg-neutral-900 dark:bg-white text-white dark:text-black font-semibold"
+                >
                   Sign up
                 </Link>
               </div>
