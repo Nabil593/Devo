@@ -53,10 +53,10 @@ const Navbar = () => {
 
   const handleLogout = async () => {
     try {
-      setIsProfileOpen(false); // ড্রপডাউন বন্ধ করুন
-      await authClient.signOut(); // সাইনআউট প্রসেস শেষ হওয়া পর্যন্ত অপেক্ষা করুন
-      route.push("/login"); // লগইন পেজে রিডাইরেক্ট করুন
-      route.refresh(); // পেজ ক্যাশ রিফ্রেশ করুন যাতে সেশন সাথে সাথে আপডেট হয়
+      setIsProfileOpen(false);
+      await authClient.signOut();
+      route.push("/login");
+      route.refresh();
     } catch (error) {
       console.error("Logout failed:", error);
     }

@@ -4,8 +4,11 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { ArrowRight, Eye, EyeOff } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
+import { useRouter } from "next/navigation";
 
 const RegisterPage = () => {
+
+  const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
@@ -25,7 +28,8 @@ const RegisterPage = () => {
       return;
     }
 
-    console.log(data)
+    router.push('/login');
+
   };
 
   return (
