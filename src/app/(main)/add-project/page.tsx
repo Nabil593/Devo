@@ -6,6 +6,7 @@ const AddProjectPage = () => {
     const [formData, setFormData] = useState({
         title: '',
         slug: '',
+        category: '',
         description: '',
         githubUrl: '',
         liveUrl: '',
@@ -15,7 +16,7 @@ const AddProjectPage = () => {
 
     const [loading, setLoading] = useState(false);
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
@@ -23,22 +24,32 @@ const AddProjectPage = () => {
         e.preventDefault();
         setLoading(true);
 
-        const response = await fetch("http://localhost:5000/api/projects", {
-          method: "POST",
-          headers: {
-          "Content-Type": "application/json",
-          },
-          body: JSON.stringify(formData),
-        });
+        const submissionData = {
+            ...formData,
+            techStack: formData.tags ? formData.tags.split(',').map(tag => tag.trim()) : []
+        };
 
-        const result = await response.json();
+        try {
+            const response = await fetch("http://localhost:5000/api/projects", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(submissionData),
+            });
 
-    if (result.success) {
-      console.log("Project added successfully!", result.data);
-    } else {
-      console.log("Failed to add project:", result.message);
-    }
-        setTimeout(() => setLoading(false), 1000);
+            const result = await response.json();
+
+            if (result.success) {
+                console.log("Project added successfully!", result.data);
+            } else {
+                console.log("Failed to add project:", result.message);
+            }
+        } catch (error) {
+            console.error("Error submitting project:", error);
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -85,6 +96,27 @@ const AddProjectPage = () => {
                                 className="w-full bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-lg px-4 py-3 text-sm text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-900 dark:focus:ring-zinc-100 transition-all"
                             />
                         </div>
+                    </div>
+
+                    {/* Category Selection Field */}
+                    <div>
+                        <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-600 dark:text-zinc-400 mb-2">
+                            Category
+                        </label>
+                        <select
+                            name="category"
+                            value={formData.category}
+                            onChange={handleChange}
+                            required
+                            className="w-full bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-lg px-4 py-3 text-sm text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-1 focus:ring-zinc-900 dark:focus:ring-zinc-100 transition-all cursor-pointer"
+                        >
+                            <option value="All">All Categories</option>
+                            <option value="Web App">Web App</option>
+                            <option value="Mobile App">Mobile App</option>
+                            <option value="AI/ML">AI/ML</option>
+                            <option value="Developer Tools">Developer Tools</option>
+                            <option value="Open Source">Open Source</option>
+                        </select>
                     </div>
 
                     <div>
@@ -163,14 +195,14 @@ const AddProjectPage = () => {
                     <div className="pt-6 border-t border-zinc-200 dark:border-zinc-800/80 flex justify-end gap-3">
                         <button 
                             type="button"
-                            className="px-5 py-2.5 rounded-lg border border-zinc-300 dark:border-zinc-800 text-sm font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-colors"
+                            className="px-5 py-2.5 rounded-lg border border-zinc-300 dark:border-zinc-800 text-sm font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-colors cursor-pointer"
                         >
                             Cancel
                         </button>
                         <button 
                             type="submit"
                             disabled={loading}
-                            className="px-5 py-2.5 rounded-lg bg-zinc-900 dark:bg-white text-white dark:text-zinc-950 font-medium text-sm hover:opacity-90 transition-opacity disabled:opacity-50"
+                            className="px-5 py-2.5 rounded-lg bg-zinc-900 dark:bg-white text-white dark:text-zinc-950 font-medium text-sm hover:opacity-90 transition-opacity disabled:opacity-50 cursor-pointer"
                         >
                             {loading ? 'Publishing...' : 'Publish Project'}
                         </button>
