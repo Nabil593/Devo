@@ -5,6 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Project } from '@/types/project';
 import { useSession } from '@/lib/auth-client';
+import CommentSection from '@/components/CommentSection';
 
 export default function ProjectDetailsPage() {
   const { id } = useParams();
@@ -172,6 +173,8 @@ export default function ProjectDetailsPage() {
             </div>
           </div>
         )}
+
+        <CommentSection />
 
       </main>
     </div>
