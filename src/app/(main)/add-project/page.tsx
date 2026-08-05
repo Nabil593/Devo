@@ -1,7 +1,11 @@
 "use client"
+import { useSession } from '@/lib/auth-client';
 import React, { useState } from 'react';
 
 const AddProjectPage = () => {
+
+    const { data: session } = useSession();
+    const user = session?.user;
 
     const [formData, setFormData] = useState({
         title: '',
@@ -26,6 +30,7 @@ const AddProjectPage = () => {
 
         const submissionData = {
             ...formData,
+            userEmail: user?.email || '',
             techStack: formData.tags ? formData.tags.split(',').map(tag => tag.trim()) : []
         };
 
@@ -49,6 +54,16 @@ const AddProjectPage = () => {
             console.error("Error submitting project:", error);
         } finally {
             setLoading(false);
+            setFormData({
+                title: '',
+                slug: '',
+                category: '',
+                description: '',
+                githubUrl: '',
+                liveUrl: '',
+                thumbnailUrl: '',
+                tags: '',
+            });
         }
     };
 

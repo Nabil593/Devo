@@ -1,3 +1,10 @@
+export interface ProjectDetails {
+  _id: string;
+  title: string;
+  category?: string;
+  thumbnailUrl?: string;
+}
+
 export interface Project {
   _id: string;
   title: string;
@@ -7,4 +14,5 @@ export interface Project {
   liveUrl?: string;
   githubUrl?: string;
   techStack?: string[];
+  createdAt?: string;
 }

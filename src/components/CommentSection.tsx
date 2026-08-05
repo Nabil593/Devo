@@ -1,5 +1,5 @@
 import { useSession } from "@/lib/auth-client";
-import { IInteractionComment } from "@/types/comment";
+import { Comment } from "@/types/comment";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { MdDelete, MdEdit } from "react-icons/md";
@@ -11,7 +11,7 @@ const CommentSection = () => {
 
   const [comment, setComment] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
-  const [commentsList, setCommentsList] = useState<IInteractionComment[]>([]);
+  const [commentsList, setCommentsList] = useState<Comment[]>([]);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editText, setEditText] = useState<string>("");
 

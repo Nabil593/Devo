@@ -17,7 +17,6 @@ const AllProjectsPage = () => {
   const [submittedCategory, setSubmittedCategory] = useState('All');
   const [submittedSort, setSubmittedSort] = useState('newest');
 
-  // ফেচ ফাংশনটি সাধারণ একটি ফাংশন হিসেবে বাইরে রাখা হলো
   const fetchProjects = async (search: string, category: string, sort: string) => {
     try {
       setLoading(true);
